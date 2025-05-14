@@ -1,8 +1,11 @@
 package com.example.employees.Employees;
+import com.example.employees.Department.DepartmentEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "employees")
+
 
 public class Employees {
     @Id
@@ -15,6 +18,10 @@ public class Employees {
     @Column(name = "email_id")
     private String emailId;
 
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    @JsonBackReference
+    private DepartmentEntity department;
     public Employees() {
     }
 
@@ -57,4 +64,11 @@ public class Employees {
     public void setEmailId(String emailId) {
         this.emailId = emailId;
     }
+    public DepartmentEntity getDepartment() {
+        return department;
+    }
+    public void setDepartment(DepartmentEntity department) {
+        this.department = department;
+    }
 }
+
