@@ -1,6 +1,5 @@
-package com.example.employees.Employees;
+package com.example.employees.User;
 
-import com.example.employees.User.JwtTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

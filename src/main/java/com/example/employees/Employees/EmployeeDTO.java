@@ -6,17 +6,22 @@ public class EmployeeDTO {
     private String lastName;
     private String emailId;
     private Long departmentId;
-    private String departmentName; // ✅ New field
+    private String departmentName;
+    private Long positionId;
+    private String positionTitle;
+
 
     public EmployeeDTO() {}
 
-    public EmployeeDTO(Long id, String firstName, String lastName, String emailId, Long departmentId, String departmentName) {
+    public EmployeeDTO(Long id, String firstName, String lastName, String emailId, Long departmentId, String departmentName, Long positionId, String positionTitle) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.emailId = emailId;
         this.departmentId = departmentId;
         this.departmentName = departmentName;
+        this.positionId = positionId;
+        this.positionTitle = positionTitle;
     }
 
     // Getters and setters
@@ -43,4 +48,20 @@ public class EmployeeDTO {
     public String getDepartmentName() { return departmentName; }
 
     public void setDepartmentName(String departmentName) { this.departmentName = departmentName; }
+    public Long getPositionId() {
+        return positionId;
+    }
+
+    public void setPositionId(Long positionId) {
+        this.positionId = positionId;
+    }
+
+    public String getPositionTitle() {
+        return positionTitle;
+    }
+
+    public void setPositionTitle(String positionTitle) {
+        this.positionTitle = positionTitle;
+    }
+
 }

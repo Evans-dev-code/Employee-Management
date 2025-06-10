@@ -1,12 +1,13 @@
 package com.example.employees.Department;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:4200")  // Adjust if needed for frontend
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/departments")
 public class DepartmentController {
@@ -14,33 +15,31 @@ public class DepartmentController {
     @Autowired
     private DepartmentService departmentService;
 
-    // Get all departments
     @GetMapping
     public List<DepartmentEntity> getAllDepartments() {
         return departmentService.getAllDepartments();
     }
 
-    // Get department by ID
     @GetMapping("/{id}")
-    public Optional<DepartmentEntity> getDepartmentById(@PathVariable Long id) {
-        return departmentService.getDepartmentById(id);
+    public ResponseEntity<DepartmentEntity> getDepartmentById(@PathVariable Long id) {
+        Optional<DepartmentEntity> department = departmentService.getDepartmentById(id);
+        return department.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Create new department
     @PostMapping
     public DepartmentEntity createDepartment(@RequestBody DepartmentEntity department) {
         return departmentService.saveDepartment(department);
     }
 
-    // Update department
     @PutMapping("/{id}")
     public DepartmentEntity updateDepartment(@PathVariable Long id, @RequestBody DepartmentEntity department) {
         return departmentService.updateDepartment(id, department);
     }
 
-    // Delete department
     @DeleteMapping("/{id}")
-    public void deleteDepartment(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,7 +1,5 @@
 package com.example.employees.Employees;
 
-import com.example.employees.Department.DepartmentEntity;
-import com.example.employees.Department.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,43 +12,36 @@ public class EmployeesService {
 
     private final EmployeesRepository employeesRepository;
     private final EmployeeMapper employeeMapper;
-    private final DepartmentRepository departmentRepository;  // Add DepartmentRepository
 
     @Autowired
-    public EmployeesService(EmployeesRepository employeesRepository, EmployeeMapper employeeMapper, DepartmentRepository departmentRepository) {
+    public EmployeesService(EmployeesRepository employeesRepository, EmployeeMapper employeeMapper) {
         this.employeesRepository = employeesRepository;
         this.employeeMapper = employeeMapper;
-        this.departmentRepository = departmentRepository;
     }
 
-    // Get employees by first name
-    public List<EmployeeDTO> getByFirstName(String name) {
-        return employeesRepository.findByFirstName(name).stream()
+    public List<EmployeeDTO> getByFirstName(String firstName) {
+        return employeesRepository.findByFirstName(firstName).stream()
                 .map(employeeMapper::toEmployeeDTO)
                 .collect(Collectors.toList());
     }
 
-    // Get employee by email
     public EmployeeDTO getByEmail(String email) {
         Employees employee = employeesRepository.findByEmailId(email);
         return employee != null ? employeeMapper.toEmployeeDTO(employee) : null;
     }
 
-    // Search employees by last name
-    public List<EmployeeDTO> searchByLastName(String part) {
-        return employeesRepository.findByLastNameContaining(part).stream()
+    public List<EmployeeDTO> searchByLastName(String partialLastName) {
+        return employeesRepository.findByLastNameContaining(partialLastName).stream()
                 .map(employeeMapper::toEmployeeDTO)
                 .collect(Collectors.toList());
     }
 
-    // Save employee
     public EmployeeDTO saveEmployee(EmployeeDTO employeeDTO) {
         Employees employee = employeeMapper.toEmployeeEntity(employeeDTO);
-        Employees savedEmployee = employeesRepository.save(employee);
-        return employeeMapper.toEmployeeDTO(savedEmployee);
+        Employees saved = employeesRepository.save(employee);
+        return employeeMapper.toEmployeeDTO(saved);
     }
 
-    // Get all employees
     public List<EmployeeDTO> getAllEmployees() {
         return employeesRepository.findAll().stream()
                 .map(employeeMapper::toEmployeeDTO)
@@ -60,41 +51,49 @@ public class EmployeesService {
     public Optional<EmployeeDTO> getEmployeeById(Long id) {
         return employeesRepository.findById(id)
                 .map(employee -> {
-                    EmployeeDTO employeeDTO = employeeMapper.toEmployeeDTO(employee);
+                    EmployeeDTO dto = employeeMapper.toEmployeeDTO(employee);
 
-                    // Set department details if present
-                    if (employee.getDepartment() != null) {
-                        DepartmentEntity department = employee.getDepartment();
-                        employeeDTO.setDepartmentId(department.getId());
-                        employeeDTO.setDepartmentName(department.getName());
+                    if (employee.getPosition() != null && employee.getPosition().getDepartment() != null) {
+                        dto.setDepartmentId(employee.getPosition().getDepartment().getId());
+                        dto.setDepartmentName(employee.getPosition().getDepartment().getName());
                     }
 
-                    return employeeDTO;
+                    return dto;
                 });
     }
 
+    public EmployeeDTO updateEmployee(Long id, EmployeeDTO dto) {
+        return employeesRepository.findById(id)
+                .map(existing -> {
+                    existing.setFirstName(dto.getFirstName());
+                    existing.setLastName(dto.getLastName());
+                    existing.setEmailId(dto.getEmailId());
 
-    // Update employee
-    public EmployeeDTO updateEmployee(Long id, EmployeeDTO updatedEmployeeDTO) {
-        return employeesRepository.findById(id).map(employee -> {
-            employee.setFirstName(updatedEmployeeDTO.getFirstName());
-            employee.setLastName(updatedEmployeeDTO.getLastName());
-            employee.setEmailId(updatedEmployeeDTO.getEmailId());
-
-            // Handle department update if present
-            if (updatedEmployeeDTO.getDepartmentId() != null) {
-                employee.setDepartment(
-                        employeeMapper.toEmployeeEntity(updatedEmployeeDTO).getDepartment()
-                );
-            }
-
-            Employees updatedEmployee = employeesRepository.save(employee);
-            return employeeMapper.toEmployeeDTO(updatedEmployee);
-        }).orElse(null);
+                    // Update position, if needed
+                    Employees updated = employeeMapper.updateEmployeeEntity(existing, dto);
+                    updated = employeesRepository.save(updated);
+                    return employeeMapper.toEmployeeDTO(updated);
+                })
+                .orElse(null);
     }
 
-    // Delete employee
     public void deleteEmployee(Long id) {
         employeesRepository.deleteById(id);
+    }
+
+    // ✅ New method: Get employees by department ID
+    public List<EmployeeDTO> getEmployeesByDepartmentId(Long departmentId) {
+        return employeesRepository.findByPosition_Department_Id(departmentId)
+                .stream()
+                .map(employeeMapper::toEmployeeDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ✅ New method: Get employees by position ID
+    public List<EmployeeDTO> getEmployeesByPositionId(Long positionId) {
+        return employeesRepository.findByPosition_Id(positionId)
+                .stream()
+                .map(employeeMapper::toEmployeeDTO)
+                .collect(Collectors.toList());
     }
 }
